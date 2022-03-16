@@ -1,8 +1,8 @@
 <?php
     $non_t = [
-        'var' => "/^(LF|GF|TF)@[_\-$&%*!?A-Ža-ž][_\-$&%*!?A-Ža-ž0-9]?$/",
-        'label' => "/^[_\-$&%*!?A-Ža-ž][_\-$&%*!?A-Ža-ž0-9]+$/",
-        'int' => "/^int@([+-]?\d*)$/",
+        'var' => "/^(LF|GF|TF)@[_\-$&%*!?A-Za-z][_\-$&%*!?A-Za-z0-9]*$/",
+        'label' => "/^[_\-$&%*!?A-Za-z][_\-$&%*!?A-Za-z0-9]*$/",
+        'int' => "/^int@([+-]?\d+)$/",
         'bool' => "/^bool@(true|false)$/",
         'string' => "/^string@([^\s\\\\]|[\\\\]\d{3})*$/",
         'nil' => "/^nil@nil$/",
@@ -17,7 +17,8 @@
         $line = preg_replace("/#.*/", "", $line);
 
         //remove whitespaces
-        $line = trim($line);
+        $line = trim(preg_replace("/\s+/", " ", $line));
+        
         return $line;
     }
 
@@ -29,6 +30,7 @@
     }
 
     function write_xml_arg($type, $arg, $el, $name){
+        $arg = str_replace('&', '&amp;', $arg);
         $arg_count = 1;
         $arg_el = $el->addChild($name, $arg);
         $arg_el->addAttribute('type', $type);
@@ -51,7 +53,6 @@
             echo 'help';
             exit();
         } else if ($cl_arg == '--help' && count($argv) !== 2){
-            echo 10;
             exit(10);
         }
     }
@@ -66,7 +67,6 @@
         
     }
     if (strcasecmp($first_line, ".IPPcode22") !== 0){
-        echo 21;
         exit(21);
     } 
     $xml_header = '<?xml version="1.0" encoding="UTF-8"?><program></program>';
@@ -80,7 +80,6 @@
         $split_line = explode(" ", $line);
         $instr = strtoupper($split_line[0]);
 
-        echo "$instr\n";
         switch ($instr) {
             case "CREATEFRAME":
             case "PUSHFRAME":
@@ -88,7 +87,6 @@
             case "RETURN":
             case "BREAK":
                 if (count($split_line) !== 1) {
-                    echo 23;
                     exit (23);
                 }
                 
@@ -97,8 +95,6 @@
             case "DEFVAR":
             case "POPS":
                 if (count($split_line) !== 2 || !preg_match($non_t['var'], $split_line[1])) {
-                    echo $split_line[1];
-                    echo 23;
                     exit (23);
                 }
                 $el = write_xml($xml, $instr, $counter++);
@@ -108,7 +104,6 @@
             case "LABEL":
             case "JUMP":
                 if (count($split_line) !== 2 || !preg_match($non_t['label'], $split_line[1])) {
-                    echo 23;
                     exit (23);
                 }
                 $el = write_xml($xml, $instr, $counter++);
@@ -118,8 +113,6 @@
             case "WRITE":
             case "EXIT":
                 if (count($split_line) !== 2 || !check_symb($split_line[1])){
-                    echo check_symb($split_line[1]);
-                    echo 23;
                     exit (23);
                 }
                 $el = write_xml($xml, $instr, $counter++);
@@ -138,7 +131,6 @@
             case "TYPE":
                 if (count($split_line) !== 3 || !preg_match($non_t['var'], $split_line[1]) ||
                 !check_symb($split_line[2])){
-                    echo 23;
                     exit (23);
                 }
                 $el = write_xml($xml, $instr, $counter++);
@@ -154,7 +146,6 @@
             case "READ":
                 if (count($split_line) !== 3 || !preg_match($non_t['var'], $split_line[1]) ||
                 !preg_match($non_t['type'], $split_line[2])){
-                    echo 23;
                     exit (23);
                 }
                 $el = write_xml($xml, $instr, $counter++);
@@ -165,7 +156,6 @@
             case "JUMPIFNEQ":
                 if (count($split_line) !== 4 || !preg_match($non_t['label'], $split_line[1]) ||
                 !check_symb($split_line[2]) || !check_symb($split_line[3])){
-                    echo 23;
                     exit (23);
                 }
                 $el = write_xml($xml, $instr, $counter++);
@@ -204,7 +194,6 @@
             case "SETCHAR":
                 if (count($split_line) !== 4 || !preg_match($non_t['var'], $split_line[1]) ||
                 !check_symb($split_line[2]) || !check_symb($split_line[3])){
-                    echo 23;
                     exit (23);
                 }
                 $el = write_xml($xml, $instr, $counter++);
@@ -230,7 +219,6 @@
             case "":
                 break;
             default:
-                echo 22;
                 exit (22);
         }
     }
