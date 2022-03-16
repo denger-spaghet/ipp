@@ -8,8 +8,6 @@
         'nil' => "/^nil@nil$/",
         'type' => "/^(int|bool|string)$/",
     ];
-
-    ini_set('display_errors', 'stderr');
     $counter = 1;
 
     function clear_line (String $line) : String {
